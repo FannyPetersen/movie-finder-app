@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 
 export default function Home() {
   const [movie, setMovie] = useState("");
-  const [results, setResults] = useState<{ Title: string; imdbID: string }[]>([]);
+  const [results, setResults] = useState<{ Title: string; imdbID: string; Poster: string }[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const apiKey = process.env.NEXT_PUBLIC_OMDB_API_KEY;
   const inputRef = useRef<HTMLInputElement>(null);
@@ -74,21 +74,26 @@ export default function Home() {
           autoComplete="off"
         />
         {showDropdown && results.length > 0 && (
-          <ul className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded shadow-lg mt-1 z-10 max-h-60 overflow-y-auto">
-            {results.map((m) => (
-              <li
-                key={m.imdbID}
-                className="px-4 py-2 hover:bg-blue-100 cursor-pointer"
-                onMouseDown={() => {
-                  setMovie(m.Title);
-                  setShowDropdown(false);
-                }}
-              >
-                {m.Title}
-              </li>
-            ))}
-          </ul>
-        )}
+  <ul className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded shadow-lg mt-1 z-10 max-h-60 overflow-y-auto">
+    {results.map((m) => (
+      <li
+        key={m.imdbID}
+        className="flex items-center px-4 py-2 hover:bg-blue-100 cursor-pointer"
+        onMouseDown={() => {
+          setMovie(m.Title);
+          setShowDropdown(false);
+        }}
+      >
+        <img
+          src={m.Poster !== "N/A" ? m.Poster : "https://via.placeholder.com/40x60?text=No+Image"}
+          alt={m.Title}
+          className="w-10 h-16 object-cover mr-3 rounded"
+        />
+        {m.Title}
+      </li>
+    ))}
+  </ul>
+)}
       </form>
     </div>
   );
