@@ -4,6 +4,7 @@ import { useState } from "react";
 
 export default function Home() {
   const [movie, setMovie] = useState("");
+  const [results, setResults] = useState<{ Title: string; imdbID: string }[]>([]);
 
   const apiKey = process.env.NEXT_PUBLIC_OMDB_API_KEY;
 
@@ -12,11 +13,15 @@ export default function Home() {
     if (!movie) return;
     const res = await fetch(`https://www.omdbapi.com/?apikey=${apiKey}&s=${encodeURIComponent(movie)}`);
     const data = await res.json();
-    console.log(data);
+    if (data.Search) {
+      setResults(data.Search);
+    } else {
+      setResults([]);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
       <form
         className="flex flex-col gap-4 bg-white p-8 rounded shadow-md"
         onSubmit={handleSubmit}
@@ -40,6 +45,13 @@ export default function Home() {
           Search
         </button>
       </form>
+      <ul className="mt-8 w-full max-w-md">
+        {results.map((m) => (
+          <li key={m.imdbID} className="py-2 border-b border-gray-200">
+            {m.Title}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
