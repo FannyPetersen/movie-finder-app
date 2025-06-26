@@ -6,7 +6,7 @@ export default function Home() {
   const [movie, setMovie] = useState("");
   const [results, setResults] = useState<{ Title: string; imdbID: string; Poster: string }[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedMovie, setSelectedMovie] = useState<{ Title: string; Poster: string } | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<{ Title: string; Poster: string, Year: string, Genre: string, imdbRating: string, Plot: string } | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_OMDB_API_KEY;
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -34,6 +34,16 @@ export default function Home() {
     return () => clearTimeout(timeoutId);
   }, [movie, apiKey]);
 
+   // Fetch full movie details when imdbID is set
+  const handleSelectMovie = async (movieObj: { imdbID: string }) => {
+    const res = await fetch(
+      `https://www.omdbapi.com/?apikey=${apiKey}&i=${movieObj.imdbID}&plot=short`
+    );
+    const data = await res.json();
+    setSelectedMovie(data);
+    setShowDropdown(false);
+  };
+
   // Hide dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -52,7 +62,7 @@ export default function Home() {
     };
   }, [showDropdown]);
 
-  return (
+ return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
       <form
         className="flex flex-col gap-4 bg-white p-8 rounded shadow-md relative"
@@ -80,10 +90,7 @@ export default function Home() {
               <li
                 key={m.imdbID}
                 className="flex items-center px-4 py-2 hover:bg-blue-100 cursor-pointer"
-                onMouseDown={() => {
-                  setSelectedMovie({ Title: m.Title, Poster: m.Poster });
-                  setShowDropdown(false);
-                }}
+                onMouseDown={() => handleSelectMovie(m)}
               >
                 <img
                   src={m.Poster !== "N/A" ? m.Poster : "https://via.placeholder.com/40x60?text=No+Image"}
@@ -98,24 +105,29 @@ export default function Home() {
       </form>
       {/* Modal */}
       {selectedMovie && (
-  <div className="fixed inset-0 flex items-center justify-center bg-black/65 z-50">
-    <div className="bg-white rounded shadow-lg p-6 flex flex-col items-center relative">
-      <button
-        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
-        onClick={() => setSelectedMovie(null)}
-        aria-label="Close"
-      >
-        &times;
-      </button>
-      <img
-        src={selectedMovie.Poster !== "N/A" ? selectedMovie.Poster : "https://via.placeholder.com/120x180?text=No+Image"}
-        alt={selectedMovie.Title}
-        className="w-32 h-48 object-cover mb-4 rounded"
-      />
-      <h2 className="text-xl font-bold">{selectedMovie.Title}</h2>
-    </div>
-  </div>
-)}
+        <div className="fixed inset-0 flex items-center justify-center bg-black/65 z-50">
+          <div className="bg-white rounded shadow-lg p-6 flex flex-col items-center relative max-w-xs">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
+              onClick={() => setSelectedMovie(null)}
+              aria-label="Close"
+            >
+              &times;
+            </button>
+            <img
+              src={selectedMovie.Poster !== "N/A" ? selectedMovie.Poster : "https://via.placeholder.com/120x180?text=No+Image"}
+              alt={selectedMovie.Title}
+              className="w-32 h-48 object-cover mb-4 rounded"
+            />
+            <h2 className="text-xl font-bold mb-2">{selectedMovie.Title}</h2>
+            <p className="mb-1 text-gray-700"><strong>Rating:</strong> {selectedMovie.imdbRating}</p>
+            <p className="mb-1 text-gray-700"><strong>Genre:</strong> {selectedMovie.Genre}</p>
+            <p className="mb-1 text-gray-700"><strong>Year:</strong> {selectedMovie.Year}</p>
+            <p className="mb-2 text-gray-700"><strong>Description:</strong> {selectedMovie.Plot}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
+
 }
