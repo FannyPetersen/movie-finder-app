@@ -6,6 +6,7 @@ export default function Home() {
   const [movie, setMovie] = useState("");
   const [results, setResults] = useState<{ Title: string; imdbID: string; Poster: string }[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState<{ Title: string; Poster: string } | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_OMDB_API_KEY;
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -74,27 +75,47 @@ export default function Home() {
           autoComplete="off"
         />
         {showDropdown && results.length > 0 && (
-  <ul className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded shadow-lg mt-1 z-10 max-h-60 overflow-y-auto">
-    {results.map((m) => (
-      <li
-        key={m.imdbID}
-        className="flex items-center px-4 py-2 hover:bg-blue-100 cursor-pointer"
-        onMouseDown={() => {
-          setMovie(m.Title);
-          setShowDropdown(false);
-        }}
-      >
-        <img
-          src={m.Poster !== "N/A" ? m.Poster : "https://via.placeholder.com/40x60?text=No+Image"}
-          alt={m.Title}
-          className="w-10 h-16 object-cover mr-3 rounded"
-        />
-        {m.Title}
-      </li>
-    ))}
-  </ul>
-)}
+          <ul className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded shadow-lg mt-1 z-10 max-h-60 overflow-y-auto">
+            {results.map((m) => (
+              <li
+                key={m.imdbID}
+                className="flex items-center px-4 py-2 hover:bg-blue-100 cursor-pointer"
+                onMouseDown={() => {
+                  setSelectedMovie({ Title: m.Title, Poster: m.Poster });
+                  setShowDropdown(false);
+                }}
+              >
+                <img
+                  src={m.Poster !== "N/A" ? m.Poster : "https://via.placeholder.com/40x60?text=No+Image"}
+                  alt={m.Title}
+                  className="w-10 h-16 object-cover mr-3 rounded"
+                />
+                {m.Title}
+              </li>
+            ))}
+          </ul>
+        )}
       </form>
+      {/* Modal */}
+      {selectedMovie && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black/65 z-50">
+    <div className="bg-white rounded shadow-lg p-6 flex flex-col items-center relative">
+      <button
+        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
+        onClick={() => setSelectedMovie(null)}
+        aria-label="Close"
+      >
+        &times;
+      </button>
+      <img
+        src={selectedMovie.Poster !== "N/A" ? selectedMovie.Poster : "https://via.placeholder.com/120x180?text=No+Image"}
+        alt={selectedMovie.Title}
+        className="w-32 h-48 object-cover mb-4 rounded"
+      />
+      <h2 className="text-xl font-bold">{selectedMovie.Title}</h2>
+    </div>
+  </div>
+)}
     </div>
   );
 }
