@@ -122,8 +122,19 @@ export default function Home() {
             <h2 className="text-xl font-bold mb-2">{selectedMovie.Title}</h2>
             <p className="mb-1 text-gray-700"><strong>Rating:</strong> {selectedMovie.imdbRating}</p>
             <p className="mb-1 text-gray-700"><strong>Genre:</strong> {selectedMovie.Genre}</p>
-            <p className="mb-1 text-gray-700"><strong>Year:</strong> {selectedMovie.Year}</p>
-            <p className="mb-2 text-gray-700"><strong>Description:</strong> {selectedMovie.Plot}</p>
+            <p className="mb-1 text-gray-700">
+  <strong>Year:</strong>{" "}
+  {selectedMovie.Year
+    ? (() => {
+        const match = selectedMovie.Year.match(/\d{4}/);
+        return match ? match[0] : selectedMovie.Year;
+      })()
+    : ""}
+</p>
+            <p className="mb-2 text-gray-700"><strong>Description:</strong>{" "}
+  {selectedMovie.Plot && selectedMovie.Plot !== "N/A"
+    ? selectedMovie.Plot
+    : "This movie remains a mystery — no description found."}</p>
           </div>
         </div>
       )}
