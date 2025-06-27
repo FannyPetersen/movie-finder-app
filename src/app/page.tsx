@@ -63,7 +63,12 @@ export default function Home() {
   }, [showDropdown]);
 
  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50"
+    >
+          <h1 className="text-3xl font-bold mb-8"
+          style={{ fontFamily: "'Pacifico', cursive" }}
+          >
+            Movie Finder 🍿</h1>
       <form
         className="flex flex-col gap-4 bg-white p-8 rounded shadow-md relative"
         onSubmit={(e) => e.preventDefault()}
