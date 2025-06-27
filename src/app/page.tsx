@@ -6,7 +6,8 @@ export default function Home() {
   const [movie, setMovie] = useState("");
   const [results, setResults] = useState<{ Title: string; imdbID: string; Poster: string }[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedMovie, setSelectedMovie] = useState<{ Title: string; Poster: string, Year: string, Genre: string, imdbRating: string, Plot: string } | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<{ imdbID: string; Title: string; Poster: string, Year: string, Genre: string, imdbRating: string, Plot: string } | null>(null);
+  const [favourites, setFavourites] = useState<{ imdbID: string }[]>([]);
   const apiKey = process.env.NEXT_PUBLIC_OMDB_API_KEY;
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -62,6 +63,16 @@ export default function Home() {
     };
   }, [showDropdown]);
 
+  const toggleFavourite = (movieObj: { imdbID: string }) => {
+  setFavourites((prev) =>
+    prev.some((fav) => fav.imdbID === movieObj.imdbID)
+      ? prev.filter((fav) => fav.imdbID !== movieObj.imdbID)
+      : [...prev, { imdbID: movieObj.imdbID }]
+  );
+};
+
+const isFavourite = (imdbID: string) => favourites.some((fav) => fav.imdbID === imdbID);
+
  return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50"
     >
@@ -110,40 +121,51 @@ export default function Home() {
       </form>
       {/* Modal */}
       {selectedMovie && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/65 z-50">
-          <div className="bg-white rounded shadow-lg p-6 flex flex-col items-center relative max-w-xs">
-            <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
-              onClick={() => setSelectedMovie(null)}
-              aria-label="Close"
-            >
-              &times;
-            </button>
-            <img
-              src={selectedMovie.Poster !== "N/A" ? selectedMovie.Poster : "https://via.placeholder.com/120x180?text=No+Image"}
-              alt={selectedMovie.Title}
-              className="w-32 h-48 object-cover mb-4 rounded"
-            />
-            <h2 className="text-xl font-bold mb-2">{selectedMovie.Title}</h2>
-            <p className="mb-1 text-gray-700"><strong>Rating:</strong> {selectedMovie.imdbRating}</p>
-            <p className="mb-1 text-gray-700"><strong>Genre:</strong> {selectedMovie.Genre}</p>
-            <p className="mb-1 text-gray-700">
-  <strong>Year:</strong>{" "}
-  {selectedMovie.Year
-    ? (() => {
-        const match = selectedMovie.Year.match(/\d{4}/);
-        return match ? match[0] : selectedMovie.Year;
-      })()
-    : ""}
-</p>
+  <div className="fixed inset-0 flex items-center justify-center bg-black/65 z-50">
+    <div className="bg-white rounded shadow-lg p-6 flex flex-col items-center relative max-w-xs">
+      <button
+        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
+        onClick={() => setSelectedMovie(null)}
+        aria-label="Close"
+      >
+        &times;
+      </button>
+      <img
+        src={selectedMovie.Poster !== "N/A" ? selectedMovie.Poster : "https://via.placeholder.com/120x180?text=No+Image"}
+        alt={selectedMovie.Title}
+        className="w-32 h-48 object-cover mb-4 rounded"
+      />
+      <h2 className="text-xl font-bold mb-2">{selectedMovie.Title}</h2>
+      <button
+        className={`mb-2 text-2xl ${isFavourite(selectedMovie.imdbID) ? "text-yellow-500" : "text-gray-300"}`}
+        onClick={() =>
+          toggleFavourite({
+            imdbID: selectedMovie.imdbID
+          })
+        }
+        aria-label={isFavourite(selectedMovie.imdbID) ? "Remove from favourites" : "Add to favourites"}
+      >
+        ★
+      </button>
+      <p className="mb-1 text-gray-700"><strong>Rating:</strong> {selectedMovie.imdbRating}</p>
+      <p className="mb-1 text-gray-700"><strong>Genre:</strong> {selectedMovie.Genre}</p>
+      <p className="mb-1 text-gray-700">
+        <strong>Year:</strong>{" "}
+        {selectedMovie.Year
+          ? (() => {
+              const match = selectedMovie.Year.match(/\d{4}/);
+              return match ? match[0] : selectedMovie.Year;
+            })()
+          : ""}
+      </p>
             <p className="mb-2 text-gray-700"><strong>Description:</strong>{" "}
-  {selectedMovie.Plot && selectedMovie.Plot !== "N/A"
-    ? selectedMovie.Plot
+        {selectedMovie.Plot && selectedMovie.Plot !== "N/A"
+          ? selectedMovie.Plot
     : "This movie remains a mystery — no description found."}</p>
-          </div>
-        </div>
-      )}
     </div>
+  </div>
+)}
+ </div>
   );
 
 }
