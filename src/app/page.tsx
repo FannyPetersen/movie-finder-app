@@ -2,12 +2,23 @@
 
 import { useState, useEffect, useRef } from "react";
 import SearchInput from "./components/SearchInput";
+import DropdownList from "./components/DropdownList";
 
 export default function Home() {
   const [movie, setMovie] = useState("");
-  const [results, setResults] = useState<{ Title: string; imdbID: string; Poster: string }[]>([]);
+  const [results, setResults] = useState<
+    { Title: string; imdbID: string; Poster: string }[]
+  >([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedMovie, setSelectedMovie] = useState<{ imdbID: string; Title: string; Poster: string, Year: string, Genre: string, imdbRating: string, Plot: string } | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<{
+    imdbID: string;
+    Title: string;
+    Poster: string;
+    Year: string;
+    Genre: string;
+    imdbRating: string;
+    Plot: string;
+  } | null>(null);
   const [favourites, setFavourites] = useState<{ imdbID: string }[]>(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("favourites");
@@ -30,7 +41,9 @@ export default function Home() {
         return;
       }
       const res = await fetch(
-        `https://www.omdbapi.com/?apikey=${apiKey}&s=${encodeURIComponent(movie)}`
+        `https://www.omdbapi.com/?apikey=${apiKey}&s=${encodeURIComponent(
+          movie
+        )}`
       );
       const data = await res.json();
       if (data.Search) {
@@ -46,7 +59,7 @@ export default function Home() {
     return () => clearTimeout(timeoutId);
   }, [movie, apiKey]);
 
-   // Fetch full movie details when imdbID is set
+  // Fetch full movie details when imdbID is set
   const handleSelectMovie = async (movieObj: { imdbID: string }) => {
     const res = await fetch(
       `https://www.omdbapi.com/?apikey=${apiKey}&i=${movieObj.imdbID}&plot=short`
@@ -75,126 +88,109 @@ export default function Home() {
   }, [showDropdown]);
 
   const toggleFavourite = (movieObj: { imdbID: string }) => {
-  setFavourites((prev) =>
-    prev.some((fav) => fav.imdbID === movieObj.imdbID)
-      ? prev.filter((fav) => fav.imdbID !== movieObj.imdbID)
-      : [...prev, { imdbID: movieObj.imdbID }]
-  );
-};
+    setFavourites((prev) =>
+      prev.some((fav) => fav.imdbID === movieObj.imdbID)
+        ? prev.filter((fav) => fav.imdbID !== movieObj.imdbID)
+        : [...prev, { imdbID: movieObj.imdbID }]
+    );
+  };
 
-const isFavourite = (imdbID: string) => favourites.some((fav) => fav.imdbID === imdbID);
+  const isFavourite = (imdbID: string) =>
+    favourites.some((fav) => fav.imdbID === imdbID);
 
- return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50"
-    >
-          <h1 className="text-3xl font-bold mb-8"
-          style={{ fontFamily: "'Pacifico', cursive" }}
-          >
-            Movie Finder 🍿</h1>
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+      <h1
+        className="text-3xl font-bold mb-8"
+        style={{ fontFamily: "'Pacifico', cursive" }}
+      >
+        Movie Finder 🍿
+      </h1>
       <form
         className="flex flex-col gap-4 bg-white p-8 rounded shadow-md relative"
         onSubmit={(e) => e.preventDefault()}
         autoComplete="off"
       >
-      <SearchInput
-        value={movie}
-        onChange={(e) => setMovie(e.target.value)}
-        onFocus={() => setShowDropdown(true)}
-        inputRef={inputRef}/>
-       {showDropdown && results.length > 0 && (
-  <ul className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded shadow-lg mt-1 z-10 max-h-60 overflow-y-auto">
-    {/* Show favourites first */}
-    {favourites
-      .map((fav) => results.find((m) => m.imdbID === fav.imdbID))
-      .filter(Boolean)
-      .map((m) => (
-        <li
-          key={m!.imdbID}
-          className="flex items-center px-4 py-2 bg-yellow-50 hover:bg-blue-100 cursor-pointer"
-          onMouseDown={() => handleSelectMovie(m!)}
-        >
-          <img
-            src={m!.Poster !== "N/A" ? m!.Poster : "https://via.placeholder.com/40x60?text=No+Image"}
-            alt={m!.Title}
-            className="w-10 h-16 object-cover mr-3 rounded"
+        <SearchInput
+          value={movie}
+          onChange={(e) => setMovie(e.target.value)}
+          onFocus={() => setShowDropdown(true)}
+          inputRef={inputRef}
+        />
+        {showDropdown && results.length > 0 && (
+          <DropdownList
+            results={results}
+            favourites={favourites}
+            isFavourite={isFavourite}
+            handleSelectMovie={handleSelectMovie}
+            showDropdown={showDropdown}
           />
-          <span className="flex items-center">
-            {m!.Title}
-            <span className="ml-2 text-yellow-500 text-lg" title="Favourite">
-              ★
-            </span>
-          </span>
-        </li>
-      ))}
-    {/* Then show the rest (non-favourites) */}
-    {results
-      .filter((m) => !isFavourite(m.imdbID))
-      .map((m) => (
-        <li
-          key={m.imdbID}
-          className="flex items-center px-4 py-2 hover:bg-blue-100 cursor-pointer"
-          onMouseDown={() => handleSelectMovie(m)}
-        >
-          <img
-            src={m.Poster !== "N/A" ? m.Poster : "https://via.placeholder.com/40x60?text=No+Image"}
-            alt={m.Title}
-            className="w-10 h-16 object-cover mr-3 rounded"
-          />
-          <span className="flex items-center">
-            {m.Title}
-          </span>
-        </li>
-      ))}
-  </ul>
-)}
+        )}
       </form>
       {/* Modal */}
       {selectedMovie && (
-  <div className="fixed inset-0 flex items-center justify-center bg-black/65 z-50">
-    <div className="bg-white rounded shadow-lg p-6 flex flex-col items-center relative max-w-xs">
-      <button
-        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
-        onClick={() => setSelectedMovie(null)}
-        aria-label="Close"
-      >
-        &times;
-      </button>
-      <img
-        src={selectedMovie.Poster !== "N/A" ? selectedMovie.Poster : "https://via.placeholder.com/120x180?text=No+Image"}
-        alt={selectedMovie.Title}
-        className="w-32 h-48 object-cover mb-4 rounded"
-      />
-      <h2 className="text-xl font-bold mb-2">{selectedMovie.Title}</h2>
-      <button
-        className={`mb-2 text-2xl ${isFavourite(selectedMovie.imdbID) ? "text-yellow-500" : "text-gray-300"}`}
-        onClick={() =>
-          toggleFavourite({
-            imdbID: selectedMovie.imdbID
-          })
-        }
-        aria-label={isFavourite(selectedMovie.imdbID) ? "Remove from favourites" : "Add to favourites"}
-      >
-        ★
-      </button>
-      <p className="mb-1 text-gray-700"><strong>Rating:</strong> {selectedMovie.imdbRating}</p>
-      <p className="mb-1 text-gray-700"><strong>Genre:</strong> {selectedMovie.Genre}</p>
-      <p className="mb-1 text-gray-700">
-        <strong>Year:</strong>{" "}
-        {selectedMovie.Year
-          ? (() => {
-              const match = selectedMovie.Year.match(/\d{4}/);
-              return match ? match[0] : selectedMovie.Year;
-            })()
-          : ""}
-      </p>
-            <p className="mb-2 text-gray-700"><strong>Description:</strong>{" "}
-        {selectedMovie.Plot && selectedMovie.Plot !== "N/A"
-          ? selectedMovie.Plot
-    : "This movie remains a mystery — no description found."}</p>
+        <div className="fixed inset-0 flex items-center justify-center bg-black/65 z-50">
+          <div className="bg-white rounded shadow-lg p-6 flex flex-col items-center relative max-w-xs">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
+              onClick={() => setSelectedMovie(null)}
+              aria-label="Close"
+            >
+              &times;
+            </button>
+            <img
+              src={
+                selectedMovie.Poster !== "N/A"
+                  ? selectedMovie.Poster
+                  : "https://via.placeholder.com/120x180?text=No+Image"
+              }
+              alt={selectedMovie.Title}
+              className="w-32 h-48 object-cover mb-4 rounded"
+            />
+            <h2 className="text-xl font-bold mb-2">{selectedMovie.Title}</h2>
+            <button
+              className={`mb-2 text-2xl ${
+                isFavourite(selectedMovie.imdbID)
+                  ? "text-yellow-500"
+                  : "text-gray-300"
+              }`}
+              onClick={() =>
+                toggleFavourite({
+                  imdbID: selectedMovie.imdbID,
+                })
+              }
+              aria-label={
+                isFavourite(selectedMovie.imdbID)
+                  ? "Remove from favourites"
+                  : "Add to favourites"
+              }
+            >
+              ★
+            </button>
+            <p className="mb-1 text-gray-700">
+              <strong>Rating:</strong> {selectedMovie.imdbRating}
+            </p>
+            <p className="mb-1 text-gray-700">
+              <strong>Genre:</strong> {selectedMovie.Genre}
+            </p>
+            <p className="mb-1 text-gray-700">
+              <strong>Year:</strong>{" "}
+              {selectedMovie.Year
+                ? (() => {
+                    const match = selectedMovie.Year.match(/\d{4}/);
+                    return match ? match[0] : selectedMovie.Year;
+                  })()
+                : ""}
+            </p>
+            <p className="mb-2 text-gray-700">
+              <strong>Description:</strong>{" "}
+              {selectedMovie.Plot && selectedMovie.Plot !== "N/A"
+                ? selectedMovie.Plot
+                : "This movie remains a mystery — no description found."}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
-  </div>
-)}
- </div>
   );
-
 }
