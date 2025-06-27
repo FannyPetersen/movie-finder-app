@@ -7,9 +7,19 @@ export default function Home() {
   const [results, setResults] = useState<{ Title: string; imdbID: string; Poster: string }[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<{ imdbID: string; Title: string; Poster: string, Year: string, Genre: string, imdbRating: string, Plot: string } | null>(null);
-  const [favourites, setFavourites] = useState<{ imdbID: string }[]>([]);
+  const [favourites, setFavourites] = useState<{ imdbID: string }[]>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("favourites");
+      return stored ? JSON.parse(stored) : [];
+    }
+    return [];
+  });
   const apiKey = process.env.NEXT_PUBLIC_OMDB_API_KEY;
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    localStorage.setItem("favourites", JSON.stringify(favourites));
+  }, [favourites]);
 
   useEffect(() => {
     const fetchMovies = async () => {
