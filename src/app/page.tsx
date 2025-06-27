@@ -6,6 +6,7 @@ import DropdownList from "./components/DropdownList";
 import MovieModal from "./components/MovieModal";
 import FavouritesTab from "./components/FavouritesTab";
 import SidebarMenu from "./components/SidebarMenu";
+import Suggestions from "./components/Suggestions";
 
 export default function Home() {
   const [movie, setMovie] = useState("");
@@ -31,6 +32,9 @@ export default function Home() {
     }
     return [];
   });
+  const [suggestions, setSuggestions] = useState<
+    { Title: string; imdbID: string; Poster: string; Year: string }[]
+  >([]);
   const [activeMenu, setActiveMenu] = useState<"home" | "favourites">("home");
   const apiKey = process.env.NEXT_PUBLIC_OMDB_API_KEY;
   const inputRef = useRef<HTMLInputElement>(null);
@@ -91,6 +95,35 @@ export default function Home() {
     };
   }, [showDropdown]);
 
+  // Fetch suggestions (latest/popular movies) on mount
+  useEffect(() => {
+    // Example IMDb IDs for popular/recent movies
+    const suggestionIds = [
+      "tt1517268", // Barbie (2023)
+      "tt15398776", // Oppenheimer (2023)
+      "tt1745564", // John Wick: Chapter 4 (2023)
+      "tt9362722", // Spider-Man: Across the Spider-Verse (2023)
+      "tt6791350", // Guardians of the Galaxy Vol. 3 (2023)
+      "tt10676048", // Wonka (2023)
+      "tt9603212", // Sound of Freedom (2023)
+      "tt10366206", // The Marvels (2023)
+    ];
+
+    const fetchSuggestions = async () => {
+      const movies = await Promise.all(
+        suggestionIds.map(async (id) => {
+          const res = await fetch(
+            `https://www.omdbapi.com/?apikey=${apiKey}&i=${id}`
+          );
+          return await res.json();
+        })
+      );
+      setSuggestions(movies.filter((m) => m && m.Response !== "False"));
+    };
+
+    fetchSuggestions();
+  }, [apiKey]);
+
   const toggleFavourite = (movieObj: {
     imdbID: string;
     Title: string;
@@ -115,34 +148,39 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex bg-gray-50">
-      <SidebarMenu 
-      activeMenu={activeMenu}
-      setActiveMenu={setActiveMenu}
-      />
+      <SidebarMenu activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
 
-      <main className="flex-1 flex flex-col items-center justify-center p-8">
+      <main className="flex-1 flex flex-col items-center p-8">
         {activeMenu === "home" && (
-          <form
-            className="flex flex-col gap-4 bg-white p-8 rounded shadow-md relative w-full max-w-lg"
-            onSubmit={(e) => e.preventDefault()}
-            autoComplete="off"
-          >
-            <SearchInput
-              value={movie}
-              onChange={(e) => setMovie(e.target.value)}
-              onFocus={() => setShowDropdown(true)}
-              inputRef={inputRef}
-            />
-            {showDropdown && results.length > 0 && (
-              <DropdownList
-                results={results}
-                favourites={favourites}
-                isFavourite={isFavourite}
-                handleSelectMovie={handleSelectMovie}
-                showDropdown={showDropdown}
+          <>
+            <form
+              className="flex flex-col gap-4 bg-white p-8 rounded shadow-md relative w-full max-w-lg mb-8"
+              onSubmit={(e) => e.preventDefault()}
+              autoComplete="off"
+            >
+              <SearchInput
+                value={movie}
+                onChange={(e) => setMovie(e.target.value)}
+                onFocus={() => setShowDropdown(true)}
+                inputRef={inputRef}
               />
-            )}
-          </form>
+              {showDropdown && results.length > 0 && (
+                <DropdownList
+                  results={results}
+                  favourites={favourites}
+                  isFavourite={isFavourite}
+                  handleSelectMovie={handleSelectMovie}
+                  showDropdown={showDropdown}
+                />
+              )}
+            </form>
+
+            <Suggestions
+              suggestions={suggestions}
+              isFavourite={isFavourite}
+              handleSelectMovie={handleSelectMovie}
+            />
+          </>
         )}
 
         {activeMenu === "favourites" && (
