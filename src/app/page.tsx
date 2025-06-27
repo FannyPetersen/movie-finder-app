@@ -5,6 +5,7 @@ import SearchInput from "./components/SearchInput";
 import DropdownList from "./components/DropdownList";
 import MovieModal from "./components/MovieModal";
 import FavouritesTab from "./components/FavouritesTab";
+import SidebarMenu from "./components/SidebarMenu";
 
 export default function Home() {
   const [movie, setMovie] = useState("");
@@ -114,37 +115,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex bg-gray-50">
-      {/* Sidebar menu */}
-      <nav className="w-48 bg-white shadow-lg flex flex-col py-8 px-4">
-        <h1
-          className="text-2xl font-bold mb-10 text-center"
-          style={{ fontFamily: "'Pacifico', cursive" }}
-        >
-          Movie Finder 🍿
-        </h1>
-        <button
-          className={`mb-4 px-4 py-2 rounded transition text-left ${
-            activeMenu === "home"
-              ? "bg-blue-500 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-          }`}
-          onClick={() => setActiveMenu("home")}
-        >
-          Home
-        </button>
-        <button
-          className={`px-4 py-2 rounded transition text-left ${
-            activeMenu === "favourites"
-              ? "bg-blue-500 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-          }`}
-          onClick={() => setActiveMenu("favourites")}
-        >
-          Favourite Movies
-        </button>
-      </nav>
+      <SidebarMenu 
+      activeMenu={activeMenu}
+      setActiveMenu={setActiveMenu}
+      />
 
-      {/* Main content */}
       <main className="flex-1 flex flex-col items-center justify-center p-8">
         {activeMenu === "home" && (
           <form
