@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import SearchInput from "./components/SearchInput";
 import DropdownList from "./components/DropdownList";
 import MovieModal from "./components/MovieModal";
+import FavouritesTab from "./components/FavouritesTab";
 
 export default function Home() {
   const [movie, setMovie] = useState("");
@@ -20,13 +21,14 @@ export default function Home() {
     imdbRating: string;
     Plot: string;
   } | null>(null);
-  const [favourites, setFavourites] = useState<{ imdbID: string }[]>(() => {
+  const [favourites, setFavourites] = useState<{ imdbID: string, Title: string, Poster: string }[]>(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("favourites");
       return stored ? JSON.parse(stored) : [];
     }
     return [];
   });
+  const [showFavouritesTab, setShowFavouritesTab] = useState(false);
   const apiKey = process.env.NEXT_PUBLIC_OMDB_API_KEY;
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -88,18 +90,18 @@ export default function Home() {
     };
   }, [showDropdown]);
 
-  const toggleFavourite = (movieObj: { imdbID: string }) => {
+  const toggleFavourite = (movieObj: { imdbID: string, Title: string, Poster: string }) => {
     setFavourites((prev) =>
       prev.some((fav) => fav.imdbID === movieObj.imdbID)
         ? prev.filter((fav) => fav.imdbID !== movieObj.imdbID)
-        : [...prev, { imdbID: movieObj.imdbID }]
+        : [...prev, { imdbID: movieObj.imdbID, Title: movieObj.Title, Poster: movieObj.Poster }]
     );
   };
 
   const isFavourite = (imdbID: string) =>
     favourites.some((fav) => fav.imdbID === imdbID);
 
-  return (
+   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
       <h1
         className="text-3xl font-bold mb-8"
@@ -107,6 +109,20 @@ export default function Home() {
       >
         Movie Finder 🍿
       </h1>
+      
+      <button
+        className="mb-4 px-4 py-2 bg-yellow-400 text-white rounded shadow hover:bg-yellow-500 transition"
+        onClick={() => setShowFavouritesTab((prev) => !prev)}
+      >
+        {showFavouritesTab ? "Hide Favourites" : "Show Favourites"}
+      </button>
+
+      {showFavouritesTab && (
+        <FavouritesTab
+          favourites={favourites}
+        />
+      )}
+
       <form
         className="flex flex-col gap-4 bg-white p-8 rounded shadow-md relative"
         onSubmit={(e) => e.preventDefault()}
