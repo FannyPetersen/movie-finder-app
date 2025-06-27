@@ -21,7 +21,9 @@ export default function Home() {
     imdbRating: string;
     Plot: string;
   } | null>(null);
-  const [favourites, setFavourites] = useState<{ imdbID: string, Title: string, Poster: string }[]>(() => {
+  const [favourites, setFavourites] = useState<
+    { imdbID: string; Title: string; Poster: string }[]
+  >(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("favourites");
       return stored ? JSON.parse(stored) : [];
@@ -90,18 +92,29 @@ export default function Home() {
     };
   }, [showDropdown]);
 
-  const toggleFavourite = (movieObj: { imdbID: string, Title: string, Poster: string }) => {
+  const toggleFavourite = (movieObj: {
+    imdbID: string;
+    Title: string;
+    Poster: string;
+  }) => {
     setFavourites((prev) =>
       prev.some((fav) => fav.imdbID === movieObj.imdbID)
         ? prev.filter((fav) => fav.imdbID !== movieObj.imdbID)
-        : [...prev, { imdbID: movieObj.imdbID, Title: movieObj.Title, Poster: movieObj.Poster }]
+        : [
+            ...prev,
+            {
+              imdbID: movieObj.imdbID,
+              Title: movieObj.Title,
+              Poster: movieObj.Poster,
+            },
+          ]
     );
   };
 
   const isFavourite = (imdbID: string) =>
     favourites.some((fav) => fav.imdbID === imdbID);
 
-   return (
+  return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
       <h1
         className="text-3xl font-bold mb-8"
@@ -109,7 +122,7 @@ export default function Home() {
       >
         Movie Finder 🍿
       </h1>
-      
+
       <button
         className="mb-4 px-4 py-2 bg-yellow-400 text-white rounded shadow hover:bg-yellow-500 transition"
         onClick={() => setShowFavouritesTab((prev) => !prev)}
@@ -120,6 +133,9 @@ export default function Home() {
       {showFavouritesTab && (
         <FavouritesTab
           favourites={favourites}
+          onRemoveFavourite={(imdbID) =>
+            setFavourites((prev) => prev.filter((fav) => fav.imdbID !== imdbID))
+          }
         />
       )}
 
