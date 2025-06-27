@@ -171,7 +171,7 @@ export default function Home() {
         )}
 
         {activeMenu === "favourites" && (
-          <div className="w-full max-w-lg">
+          <div className="w-full h-full flex-1 flex items-start justify-center">
             <FavouritesTab
               favourites={favourites}
               onRemoveFavourite={(imdbID) =>
@@ -179,6 +179,13 @@ export default function Home() {
                   prev.filter((fav) => fav.imdbID !== imdbID)
                 )
               }
+              onSelectMovie={async (movie) => {
+                const res = await fetch(
+                  `https://www.omdbapi.com/?apikey=${apiKey}&i=${movie.imdbID}&plot=short`
+                );
+                const data = await res.json();
+                setSelectedMovie(data);
+              }}
             />
           </div>
         )}
