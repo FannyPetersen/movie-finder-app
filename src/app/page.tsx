@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import SearchInput from "./components/SearchInput";
 
 export default function Home() {
   const [movie, setMovie] = useState("");
@@ -95,21 +96,11 @@ const isFavourite = (imdbID: string) => favourites.some((fav) => fav.imdbID === 
         onSubmit={(e) => e.preventDefault()}
         autoComplete="off"
       >
-        <label htmlFor="movie" className="text-lg font-medium">
-          Enter a movie name:
-        </label>
-        <input
-          id="movie"
-          name="movie"
-          type="text"
-          placeholder="Movie name"
-          value={movie}
-          ref={inputRef}
-          onFocus={() => results.length > 0 && setShowDropdown(true)}
-          onChange={(e) => setMovie(e.target.value)}
-          className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          autoComplete="off"
-        />
+      <SearchInput
+        value={movie}
+        onChange={(e) => setMovie(e.target.value)}
+        onFocus={() => setShowDropdown(true)}
+        inputRef={inputRef}/>
        {showDropdown && results.length > 0 && (
   <ul className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded shadow-lg mt-1 z-10 max-h-60 overflow-y-auto">
     {/* Show favourites first */}
