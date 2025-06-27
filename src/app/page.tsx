@@ -146,9 +146,20 @@ export default function Home() {
   const isFavourite = (imdbID: string) =>
     favourites.some((fav) => fav.imdbID === imdbID);
 
+  const handleSetActiveMenu = (menu: string) => {
+    setActiveMenu(menu as "home" | "favourites");
+    if (menu === "home") {
+      setMovie("");  
+      setShowDropdown(false); 
+    }
+  };
+
   return (
     <div className="min-h-screen flex bg-gray-50">
-      <SidebarMenu activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
+      <SidebarMenu
+        activeMenu={activeMenu}
+        setActiveMenu={handleSetActiveMenu}
+      />
 
       <main className="flex-1 flex flex-col items-center p-8">
         {activeMenu === "home" && (
