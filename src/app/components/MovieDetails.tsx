@@ -25,25 +25,33 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({
 }) => (
   <div className="flex-1 flex flex-col">
     <h2 className="text-2xl font-bold mb-2">{movie.Title}</h2>
-    <button
-      className={`mb-4 text-2xl self-start ${
-        isFavourite(movie.imdbID) ? "text-yellow-500" : "text-gray-300"
-      }`}
-      onClick={() =>
-        toggleFavourite({
-          imdbID: movie.imdbID,
-          Title: movie.Title,
-          Poster: movie.Poster,
-        })
-      }
-      aria-label={
-        isFavourite(movie.imdbID)
-          ? "Remove from favourites"
-          : "Add to favourites"
-      }
-    >
-      ★
-    </button>
+    <div className="flex items-center gap-2 mb-4">
+      <button
+        className={`text-2xl ${
+          isFavourite(movie.imdbID) ? "text-yellow-500" : "text-gray-300"
+        }`}
+        onClick={() =>
+          toggleFavourite({
+            imdbID: movie.imdbID,
+            Title: movie.Title,
+            Poster: movie.Poster,
+          })
+        }
+        aria-label={
+          isFavourite(movie.imdbID)
+            ? "Remove from favourites"
+            : "Add to favourites"
+        }
+      >
+        ★
+      </button>
+      <p className="relative top-0.5 text-sm text-gray-700">
+        {isFavourite(movie.imdbID)
+          ? "Remove from my collection"
+          : "Add to my collection"}
+      </p>
+    </div>
+
     <p className="mb-1 text-gray-700">
       <strong>Rating:</strong> {movie.imdbRating}
     </p>
